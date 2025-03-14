@@ -22,4 +22,5 @@ SUDO_USERS = list(map(lambda x: int(x), getenv("SUDO_USERS", default="6257927828
 for x in DEV:
     SUDO_USERS.append(x)
 OWNER_ID = int(getenv("OWNER_ID", default="6257927828"))
+SUDO_USERS.append(OWNER_ID)
 BOT = TelegramClient('ꜱ ᴛ ᴏ ʀ ᴍ', API_ID, API_HASH).start(bot_token=BOT_TOKEN)
