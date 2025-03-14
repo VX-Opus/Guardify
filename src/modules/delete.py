@@ -1,7 +1,7 @@
 from telethon import TelegramClient, events
 from telethon.tl.types import MessageMediaPhoto, MessageMediaDocument
 import asyncio
-import config import BOT
+from config import BOT
 
 
 delay_times = {}
