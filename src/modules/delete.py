@@ -1,44 +1,43 @@
+from telethon import TelegramClient, events
+from telethon.tl.types import MessageMediaPhoto, MessageMediaDocument
 import asyncio
-from pyrogram import Client, filters
-from pyrogram.types import Message
-import config
+import config import BOT
 
-app = Client(
-    "antinude",
-    bot_token=config.BOT_TOKEN,
-    api_id=config.API_ID,
-    api_hash=config.API_HASH
-)
 
 delay_times = {}
 
-@app.on_message(filters.command("setdelay"))
-async def set_delay(client: Client, message: Message):
+
+# Command to set the delay time
+@BOT.on(events.NewMessage(pattern='/setdelay'))
+async def set_delay(event):
     try:
-        delay = int(message.command[1]) 
+        # Extract the delay time from the command
+        delay = int(event.message.text.split(' ')[1])
         if delay < 1:
-            await message.reply("ᴅᴇʟᴀʏ ᴛɪᴍᴇ ᴍᴜꜱᴛ ʙᴇ ᴀᴛ ʟᴇᴀꜱᴛ 1 ᴍɪɴᴜᴛᴇ.")
+            await event.reply("Delay time must be at least 1 minute.")
             return
 
-        chat_id = message.chat.id
+        # Store the delay time for the chat
+        chat_id = event.chat_id
         delay_times[chat_id] = delay
-        await message.reply(f"ᴀᴜᴛᴏ-ᴅᴇʟᴇᴛɪᴏɴ ᴅᴇʟᴀʏ ꜱᴇᴛ ᴛᴏ {delay} ᴍɪɴᴜᴛᴇꜱ.")
+        await event.reply(f"Auto-deletion delay set to {delay} minutes.")
 
     except (IndexError, ValueError):
-        await message.reply("ᴜꜱᴀɢᴇ: /setdelay <ᴛɪᴍᴇ_ɪɴ_ᴍɪɴᴜᴛᴇꜱ>")
+        await event.reply("Usage: /setdelay <time_in_minutes>")
 
-@app.on_message(filters.group & ~filters.poll & (
-    filters.photo | filters.video | filters.video_note | filters.audio | filters.voice | filters.document | filters.sticker | filters.animation | filters.media_group
-))
-async def handle_media(client: Client, message: Message):
-    chat_id = message.chat.id
+# Handler for media messages
+@BOT.on(events.NewMessage(func=lambda e: e.is_group and e.media))
+async def handle_media(event):
+    chat_id = event.chat_id
 
+    # Check if a delay time is set for this chat
     if chat_id in delay_times:
         delay = delay_times[chat_id]
-        await asyncio.sleep(delay * 60)
+        await asyncio.sleep(delay * 60)  # Wait for the specified delay
 
         try:
-            await message.delete()
-            print(f"ᴅᴇʟᴇᴛᴇᴅ ᴍᴇᴅɪᴀ ɪɴ ᴄʜᴀᴛ {chat_id} ᴀꜰᴛᴇʀ {delay} ᴍɪɴᴜᴛᴇꜱ.")
+            # Delete the media message
+            await event.delete()
+            print(f"Deleted media in chat {chat_id} after {delay} minutes.")
         except Exception as e:
-            print(f"ꜰᴀɪʟᴇᴅ ᴛᴏ ᴅᴇʟᴇᴛᴇ ᴍᴇᴅɪᴀ: {e}")
+            print(f"Failed to delete media: {e}")
