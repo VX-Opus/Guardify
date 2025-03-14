@@ -89,3 +89,4 @@ async def start_help(event):
 <b>✨ •─╼⃝𖠁 ʜᴇʟᴘ ᴍᴇɴᴜ 𖠁⃝╾─• ✨</b>
 """
         await event.respond(TEXT, buttons=START_OP, parse_mode='html')
+        return
