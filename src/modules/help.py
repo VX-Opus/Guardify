@@ -82,7 +82,7 @@ async def help_back(event):
 
 
 # Handle the /start command with the "help" parameter
-@BOT.on(events.NewMessage(pattern="/start help"))
+@BOT.on(events.NewMessage(pattern="start_help"))
 async def start_help(event):
     if event.is_private:
         TEXT = f"""
