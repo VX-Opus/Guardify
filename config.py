@@ -7,7 +7,6 @@ from dotenv import load_dotenv
 
 logging.basicConfig(format='[%(levelname) 5s/%(asctime)s] %(name)s: %(message)s', level=logging.WARNING)
 
-BOT_TOKEN = getenv("BOT_TOKEN", default=None)
 API_ID = 18136872
 API_HASH = "312d861b78efcd1b02183b2ab52a83a4"
 SUDO_USERS.append(OWNER_ID)
@@ -18,9 +17,13 @@ SUDO_ID = [6257927828]
 LOGGER = False
 BOT_NAME = "Guardify"
 SUPPORT_ID = -1002064111110
+
+BOT_TOKEN = getenv("BOT_TOKEN", default=None)
+
 SUDO_USERS = list(map(lambda x: int(x), getenv("SUDO_USERS", default="6257927828").split()))
 for x in DEV:
     SUDO_USERS.append(x)
 OWNER_ID = int(getenv("OWNER_ID", default="6257927828"))
 SUDO_USERS.append(OWNER_ID)
+
 BOT = TelegramClient('ꜱ ᴛ ᴏ ʀ ᴍ', API_ID, API_HASH).start(bot_token=BOT_TOKEN)
