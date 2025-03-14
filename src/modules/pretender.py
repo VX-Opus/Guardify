@@ -100,7 +100,7 @@ async def chk_usr(event):
 @BOT.on(events.NewMessage(pattern=r"/pretender(?: |$)(.*)"))
 async def set_mataa(event):
     if event.is_group:
-        admin_ids = [user.id async for user in client.iter_participants(event.chat_id, filter=ChannelParticipantsAdmins)]
+        admin_ids = [user.id async for user in BOT.iter_participants(event.chat_id, filter=ChannelParticipantsAdmins)]
         if event.sender_id not in admin_ids:
             return
         if not event.pattern_match.group(1):
