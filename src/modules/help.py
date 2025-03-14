@@ -49,13 +49,11 @@ async def start(event):
     bot_name = KEX.first_name
 
     if event.is_private:
-        # If the command is used in private chat, show the help menu
         TEXT = f"""
 <b>✨ •─╼⃝𖠁 ʜᴇʟᴘ ᴍᴇɴᴜ 𖠁⃝╾─• ✨</b>
 """
         await event.respond(TEXT, buttons=START_OP, parse_mode='html')
     else:
-        # If the command is used in a group, send a link to start the bot in private
         TEXT = "ᴄᴏɴᴛᴀᴄᴛ ᴍᴇ ɪɴ ᴘᴍ ꜰᴏʀ ʜᴇʟᴘ!"
         BUTTON = [[Button.url("ʜᴇʟᴘ", f"https://t.me/vxguardian_bot?start=help")]]
         await event.reply(TEXT, buttons=BUTTON, parse_mode='html')
@@ -80,8 +78,6 @@ async def help_back(event):
 """
     await event.edit(TEXT, buttons=START_OP, parse_mode='html')
 
-
-# Handle the /start command with the "help" parameter
 @BOT.on(events.NewMessage(pattern="/start help"))
 async def start_help(event):
     if event.is_private:
