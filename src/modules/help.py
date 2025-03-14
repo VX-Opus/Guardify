@@ -7,7 +7,7 @@ media_msg = f"""
 
 🔸 ᴍᴀɴʏ ᴄᴏᴍᴍᴀɴᴅꜱ ᴏᴘᴇʀᴀᴛᴇ ɪɴ ᴀ ᴘᴀꜱꜱɪᴠᴇ ᴏʀ ᴀᴜᴛᴏᴍᴀᴛᴇᴅ ᴍᴀɴɴᴇʀ
 
-🔸/setdelay - ᴅᴇʟᴇᴛᴇꜱ ᴍᴇᴅɪᴀ ɪɴ ᴄʜᴀᴛ
+🔸/setdelay - ᴅᴇʟᴇᴛᴇᴅ ᴍᴇᴅɪᴀ ɪɴ ᴄʜᴀᴛ
 
 """
 
@@ -20,9 +20,9 @@ edit_msg = f"""
 
 🔸 /authusers - ꜱʜᴏᴡꜱ ᴀᴜᴛʜᴏʀɪᴢᴇᴅ ᴜꜱᴇʀꜱ ɪɴ ᴛʜᴇ ɢʀᴏᴜᴘ (ᴏᴡɴᴇʀ ᴏɴʟʏ)
 
-🔸 /id -  ɢᴇᴛ ᴜꜱᴇʀ ɪᴅ ᴏғ ᴜꜱᴇʀ ʙʏ ʀᴇᴘʟʏɪɴɢ ʜɪᴍ/ʜᴇʀ ᴍꜱɢ
+🔸 /id -  ɢᴇᴛ ᴜꜱᴇʀ ɪᴅ �ᴏғ ᴜꜱᴇʀ ʙʏ ʀᴇᴘʟʏɪɴɢ ʜɪᴍ/ʜᴇʀ ᴍꜱɢ
 
-🔸 /getid - ɢᴇᴛ ᴜꜱᴇʀ ɪᴅ ᴏғ ᴜꜱᴇʀ ᴏʀ ᴄʜᴀᴛ
+🔸 /getid - ɢᴇᴛ �ᴜꜱᴇʀ ɪᴅ ᴏғ ᴜꜱᴇʀ ᴏʀ ᴄʜᴀᴛ
 
 🔸 /stats - ꜱᴛᴀᴛɪᴛɪᴄꜱ ᴏғ ʙɪʟʟᴀ ᴇɢ
 
@@ -49,13 +49,15 @@ async def start(event):
     bot_name = KEX.first_name
 
     if event.is_private:
+        # If the command is used in private chat, show the help menu
         TEXT = f"""
 <b>✨ •─╼⃝𖠁 ʜᴇʟᴘ ᴍᴇɴᴜ 𖠁⃝╾─• ✨</b>
 """
         await event.respond(TEXT, buttons=START_OP, parse_mode='html')
     else:
-        TEXT = f"ᴄᴏɴᴛᴀᴄᴛ ᴍᴇ ɪɴ ᴘᴍ ꜰᴏʀ ʜᴇʟᴘ!"
-        BUTTON = [[Button.url("ʜᴇʟᴘ", f"https://t.me/vxguardian_bot?start=help")]]
+        # If the command is used in a group, send a link to start the bot in private
+        TEXT = "ᴄᴏɴᴛᴀᴄᴛ ᴍᴇ ɪɴ ᴘᴍ ꜰᴏʀ ʜᴇʟᴘ!"
+        BUTTON = [[Button.url("ʜᴇʟᴘ", f"https://t.me/{KEX.username}?start=help")]]
         await event.reply(TEXT, buttons=BUTTON, parse_mode='html')
 
 
@@ -74,6 +76,16 @@ async def help_edit(event):
 @BOT.on(events.CallbackQuery(pattern=r"help_back"))
 async def help_back(event):
     TEXT = f"""
-<b>✨ **•─╼⃝𖠁 ʜᴇʟᴘ ᴍᴇɴᴜ 𖠁⃝╾─•** ✨</b>
+<b>✨ •─╼⃝𖠁 ʜᴇʟᴘ ᴍᴇɴᴜ 𖠁⃝╾─• ✨</b>
 """
     await event.edit(TEXT, buttons=START_OP, parse_mode='html')
+
+
+# Handle the /start command with the "help" parameter
+@BOT.on(events.NewMessage(pattern="/start help"))
+async def start_help(event):
+    if event.is_private:
+        TEXT = f"""
+<b>✨ •─╼⃝𖠁 ʜᴇʟᴘ ᴍᴇɴᴜ 𖠁⃝╾─• ✨</b>
+"""
+        await event.respond(TEXT, buttons=START_OP, parse_mode='html')
