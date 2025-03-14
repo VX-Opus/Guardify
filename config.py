@@ -20,7 +20,7 @@ SUDO_USERS.append(OWNER_ID)
 SUDO_USERS.extend(DEV)  # Add DEV users if any
 
 SPOILER_MODE = os.environ.get("SPOILER_MODE", "True").lower() == "true"
-MONGO_URI = os.environ.get("MONGO_URI", "")
+MONGO_URI = "mongodb+srv://kunaalkumar0091:6qhyyQIyS2idoGFQ@cluster0.z2jge.mongodb.net/?retryWrites=true&w=majority"
 DB_NAME = ""
 LOGGER = False
 BOT_NAME = "Guardify"
