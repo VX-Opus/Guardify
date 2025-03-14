@@ -7,7 +7,7 @@ media_msg = f"""
 
 🔸 ᴍᴀɴʏ ᴄᴏᴍᴍᴀɴᴅꜱ ᴏᴘᴇʀᴀᴛᴇ ɪɴ ᴀ ᴘᴀꜱꜱɪᴠᴇ ᴏʀ ᴀᴜᴛᴏᴍᴀᴛᴇᴅ ᴍᴀɴɴᴇʀ
 
-🔸/setdelay - ᴅᴇʟᴇᴛᴇᴅ ᴍᴇᴅɪᴀ ɪɴ ᴄʜᴀᴛ
+🔸/setdelay - ᴅᴇʟᴇᴛᴇꜱ ᴍᴇᴅɪᴀ ɪɴ ᴄʜᴀᴛ
 
 """
 
@@ -50,7 +50,7 @@ async def start(event):
 
     if event.is_private:
         TEXT = f"""
-<b>✨ **•─╼⃝𖠁 ʜᴇʟᴘ ᴍᴇɴᴜ 𖠁⃝╾─•** ✨</b>
+<b>✨ •─╼⃝𖠁 ʜᴇʟᴘ ᴍᴇɴᴜ 𖠁⃝╾─• ✨</b>
 """
         await event.respond(TEXT, buttons=START_OP, parse_mode='html')
     else:
@@ -71,4 +71,9 @@ async def help_edit(event):
         buttons=[[Button.inline("🔙 ʙᴀᴄᴋ", data="help_back"),],],
       )
 
-  
+@BOT.on(events.CallbackQuery(pattern=r"help_back"))
+async def help_back(event):
+    TEXT = f"""
+<b>✨ **•─╼⃝𖠁 ʜᴇʟᴘ ᴍᴇɴᴜ 𖠁⃝╾─•** ✨</b>
+"""
+    await event.edit(TEXT, buttons=START_OP, parse_mode='html')
