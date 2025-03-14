@@ -57,7 +57,7 @@ async def start(event):
     else:
         # If the command is used in a group, send a link to start the bot in private
         TEXT = "ᴄᴏɴᴛᴀᴄᴛ ᴍᴇ ɪɴ ᴘᴍ ꜰᴏʀ ʜᴇʟᴘ!"
-        BUTTON = [[Button.url("ʜᴇʟᴘ", f"https://t.me/{KEX.username}?start=help")]]
+        BUTTON = [[Button.url("ʜᴇʟᴘ", f"https://t.me/vxguardian_bot?start=help")]]
         await event.reply(TEXT, buttons=BUTTON, parse_mode='html')
 
 
