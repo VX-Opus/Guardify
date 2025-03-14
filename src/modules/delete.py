@@ -32,6 +32,5 @@ async def handle_media(event):
 
         try:
             await event.delete()
-            #print(f"Deleted media in chat {chat_id} after {delay} minutes.")
-        #except Exception as e:
-            #print(f"Failed to delete media: {e}")
+        except Exception:
+            pass
