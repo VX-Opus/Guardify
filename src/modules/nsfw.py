@@ -59,18 +59,24 @@ async def media_handler(event):
 
 slang_pattern = re.compile(r'\b(' + '|'.join(re.escape(word) for word in slang_words) + r')\b', re.IGNORECASE)
 
-@BOT.on(events.NewMessage(func=lambda e: e.is_group and e.text))
-async def slang_filter(event):
-    sender = await BOT.get_permissions(event.chat_id, event.sender_id)
-    if sender.is_admin:
-        return
-    
-    sentence = event.text
-    censored_sentence = slang_pattern.sub(lambda m: f'||{m.group()}||', sentence)
-    
-    if sentence != censored_sentence:
-        await event.delete()
-        name = event.sender.first_name
-        msgtxt = f"{name}, ʏᴏᴜʀ ᴍᴇꜱꜱᴀɢᴇ ᴡᴀꜱ ᴅᴇʟᴇᴛᴇᴅ ᴅᴜᴇ ᴛᴏ ɪɴᴀᴘᴘʀᴏᴘʀɪᴀᴛᴇ ʟᴀɴɢᴜᴀɢᴇ. ʜᴇʀᴇ ɪꜱ ᴀ ᴄᴇɴꜱᴏʀᴇᴅ ᴠᴇʀꜱɪᴏɴ:\n\n{censored_sentence}"
-        if SPOILER:
-            await event.respond(msgtxt)
+@BOT.on(events.NewMessage(pattern=None))
+async def slang(event):
+    if event.is_group:
+        sender = await event.client.get_permissions(event.chat_id, event.sender_id)
+        is_admin = sender.is_admin or sender.is_creator
+
+        if not is_admin:
+            sentence = event.raw_text
+            sent = re.sub(r'\W+', ' ', sentence)
+            isslang = False
+
+            for word in sent.split():
+                if word.lower() in slang_words:
+                    isslang = True
+                    await event.delete()
+                    sentence = sentence.replace(word, f'||{word}||')
+
+            if isslang and SPOILER:
+                name = (await event.get_sender()).first_name
+                msgtxt = f"""{name}, ʏᴏᴜʀ ᴍᴇꜱꜱᴀɢᴇ ʜᴀꜱ ʙᴇᴇɴ ᴅᴇʟᴇᴛᴇᴅ ᴅᴜᴇ ᴛᴏ ᴛʜᴇ ᴘʀᴇꜱᴇɴᴄᴇ ᴏꜰ ɪɴᴀᴘᴘʀᴏᴘʀɪᴀᴛᴇ ʟᴀɴɢᴜᴀɢᴇ[ɢᴀᴀʟɪ/ꜱʟᴀɴɢꜰᴜʟ ᴡᴏʀᴅꜱ].\n\nʜᴇʀᴇ ɪꜱ ᴀ ᴄᴇɴꜱᴏʀᴇᴅ ᴠᴇʀꜱɪᴏɴ ᴏꜰ ʏᴏᴜʀ ᴍᴇꜱꜱᴀɢᴇ:\n\n{sentence}"""
+                await event.reply(msgtxt)
