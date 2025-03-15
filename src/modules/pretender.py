@@ -3,6 +3,7 @@ from motor.motor_asyncio import AsyncIOMotorClient as MongoCli
 from telethon import events
 from telethon.tl.types import ChannelParticipantsAdmins
 from config import BOT
+from src.status import *
 MONGO_DB_URI = "mongodb+srv://kunaalkumar0091:6qhyyQIyS2idoGFQ@cluster0.z2jge.mongodb.net/?retryWrites=true&w=majority"
 
 mongo = MongoCli(MONGO_DB_URI).Rankings
@@ -98,6 +99,7 @@ async def chk_usr(event):
     )
 
 @BOT.on(events.NewMessage(pattern=r"/pretender(?: |$)(.*)"))
+@is_admin
 async def set_mataa(event):
     if event.is_group:
         admin_ids = [user.id async for user in BOT.iter_participants(event.chat_id, filter=ChannelParticipantsAdmins)]
