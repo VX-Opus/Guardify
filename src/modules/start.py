@@ -41,24 +41,9 @@ async def update_and_restart(event):
     try:
         # Perform git pull to update the code
         os.system("git pull")
-
-        # Restart the bot
-        if HEROKU_APP:
-            try:
-                heroku = heroku3.from_key(HEROKU_APIKEY)
-                app = heroku.apps()[HEROKU_APPNAME]
-                app.restart()
-                await response.edit("ᴜᴘᴅᴀᴛᴇᴅ ᴀɴᴅ ʀᴇsᴛᴀʀᴛᴇᴅ ᴏɴ ʜᴇʀᴏᴋᴜ!")
-            except Exception as heroku_error:
-                LOGS.error(f"{heroku_error}")
-                await response.edit("ғᴀɪʟᴇᴅ ᴛᴏ ʀᴇsᴛᴀʀᴛ ᴏɴ ʜᴇʀᴏᴋᴜ. ᴜsɪɴɢ ʟᴏᴄᴀʟ ʀᴇsᴛᴀʀᴛ...")
-                os.system(f"kill -9 {os.getpid()} && bash start.sh")
-        else:
-            # Local restart
-            os.system(f"kill -9 {os.getpid()} && bash start.sh")
-            await response.edit("ᴜᴘᴅᴀᴛᴇᴅ ᴀɴᴅ ʀᴇsᴛᴀʀᴛᴇᴅ ʟᴏᴄᴀʟʟʏ!")
+        os.system(f"kill -9 {os.getpid()} && bash start.sh")
+        await response.edit("ᴜᴘᴅᴀᴛᴇᴅ ᴀɴᴅ ʀᴇsᴛᴀʀᴛᴇᴅ ʟᴏᴄᴀʟʟʏ!")
     except Exception as e:
-        LOGS.error(e)
         await response.edit(f"ғᴀɪʟᴇᴅ ᴛᴏ ᴜᴘᴅᴀᴛᴇ ᴀɴᴅ ʀᴇsᴛᴀʀᴛ: {e}")
 
 @BOT.on(events.NewMessage(pattern='/stop'))
