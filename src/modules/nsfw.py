@@ -43,12 +43,16 @@ async def media_handler(event):
         if nsfw:
             name = event.sender.first_name
             await event.delete()
-            warning_msg = f"**⚠️ ɴꜱꜰᴡ ᴅᴇᴛᴇᴄᴛᴇᴅ**\n{name}, ʏᴏᴜʀ ᴍᴇᴅɪᴀ ᴡᴀꜱ ʀᴇᴍᴏᴠᴇᴅ."
-            await event.respond(warning_msg)
+            warning_msg = await event.respond(f"**⚠️ ɴꜱꜰᴡ ᴅᴇᴛᴇᴄᴛᴇᴅ**\n{name}")
             
             if SPOILER:
-                await event.respond(f"||{warning_msg}||")
-        
+                spoiler_msg = await event.respond(f"||ʏᴏᴜʀ ᴍᴇᴅɪᴀ ᴡᴀꜱ ʀᴇᴍᴏᴠᴇᴅ !!||")
+                await asyncio.sleep(60)
+                await spoiler_msg.delete()
+            
+            await asyncio.sleep(60)
+            await warning_msg.delete()
+
         os.remove(file_path)
     except Exception as e:
         print(f"ᴇʀʀᴏʀ: {e}")
