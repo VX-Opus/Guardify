@@ -33,32 +33,35 @@ async def check_nsfw_image(image_path):
         print(f"ᴇʀʀᴏʀ ᴘʀᴏᴄᴇꜱꜱɪɴɢ ɪᴍᴀɢᴇ: {e}")
         return False
 
-@BOT.on(events.NewMessage(func=lambda e: e.is_group and (e.photo or e.video or e.sticker or e.gif or e.document)))
-async def media_handler(event):
+@BOT.on(events.NewMessage(func=lambda e: e.is_group and e.photo))
+async def image(event):
     try:
-        file_path = await event.download_media()
+        photo = event.photo
+        print(f"ᴅᴏᴡɴʟᴏᴀᴅɪɴɢ ɪᴍᴀɢᴇ ᴡɪᴛʜ ꜰɪʟᴇ ɪᴅ: {photo.id}")
 
-        nsfw = await check_nsfw_media(file_path) 
+        file_path = await event.download_media()
+        print(f"ɪᴍᴀɢᴇ ᴅᴏᴡɴʟᴏᴀᴅᴇᴅ ᴛᴏ: {file_path}")
+
+        nsfw = await check_nsfw_image(file_path)
 
         if nsfw:
             name = event.sender.first_name
-            await event.delete() 
-
+            await event.delete()
+            
             await event.respond(
-                f"**⚠️ ᴡᴀʀɴɪɴɢ** (ɴꜱꜰᴡ ᴅᴇᴛᴇᴄᴛᴇᴅ)\n**{name}** ꜱᴇɴᴛ ɴꜱꜰᴡ ᴍᴇᴅɪᴀ."
+                f"**⚠️ ᴡᴀʀɴɪɴɢ** (ɴꜱꜰᴡ ᴅᴇᴛᴇᴄᴛᴇᴅ)\n**{name}** ꜱᴇɴᴛ ɴꜱꜰᴡ ɪᴍᴀɢᴇ."
             )
 
-            if SPOILER:
+            if SPOILER:  
                 await event.respond(
                     file=file_path,
-                    message=f"**⚠️ ᴡᴀʀɴɪɴɢ** (ɴꜱꜰᴡ ᴅᴇᴛᴇᴄᴛᴇᴅ)\n**{name}** ꜱᴇɴᴛ ɴꜱꜰᴡ ᴍᴇᴅɪᴀ.",
-                    spoiler=True 
+                    message=f"**⚠️ ᴡᴀʀɴɪɴɢ** (ɴꜱꜰᴡ ᴅᴇᴛᴇᴄᴛᴇᴅ)\n**{name}** ꜱᴇɴᴛ ɴꜱꜰᴡ ɪᴍᴀɢᴇ.",
+                    spoiler=True
                 )
-                
         os.remove(file_path)
 
     except Exception as e:
-        pass  # Silently handle 
+        print(f"ᴇʀʀᴏʀ ᴘʀᴏᴄᴇssɪɴɢ ɪᴍᴀɢᴇ: {e}") 
 
 @BOT.on(events.NewMessage(func=lambda e: e.is_group and e.text))
 async def slang(event):
