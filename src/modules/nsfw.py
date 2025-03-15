@@ -33,68 +33,37 @@ async def check_nsfw_image(image_path):
         print(f"ᴇʀʀᴏʀ ᴘʀᴏᴄᴇꜱꜱɪɴɢ ɪᴍᴀɢᴇ: {e}")
         return False
 
-@BOT.on(events.NewMessage(func=lambda e: e.is_group and (e.photo or e.video or e.sticker or e.gif or e.document)))
-async def media_handler(event):
+@BOT.on(events.NewMessage(func=lambda e: e.is_group and (e.photo)))
+async def image(event):
     try:
-        # Determine the type of media
-        if event.photo:
-            media_type = "photo"
-            media = event.photo
-        elif event.video:
-            media_type = "video"
-            media = event.video
-        elif event.sticker:
-            media_type = "sticker"
-            media = event.sticker
-        elif event.gif:
-            media_type = "gif"
-            media = event.gif
-        elif event.document:
-            media_type = "document"
-            media = event.document
-        else:
-            return
-
-        print(f"Downloading {media_type} with file id: {media.id}")
+        photo = event.photo
+        print(f"ᴅᴏᴡɴʟᴏᴀᴅɪɴɢ ɪᴍᴀɢᴇ ᴡɪᴛʜ ꜰɪʟᴇ ɪᴅ: {photo.id}")
 
         file_path = await event.download_media()
-        print(f"{media_type.capitalize()} downloaded to: {file_path}")
+        print(f"ɪᴍᴀɢᴇ ᴅᴏᴡɴʟᴏᴀᴅᴇᴅ ᴛᴏ: {file_path}")
 
-        # Skip NSFW check for non-image files
-        if media_type in ["photo", "sticker"]:
-            # Convert .webp stickers to .png for processing
-            if media_type == "sticker" and file_path.endswith(".webp"):
-                converted_path = file_path.replace(".webp", ".png")
-                with Image.open(file_path) as img:
-                    img.save(converted_path, "PNG")
-                os.remove(file_path)  # Remove the original .webp file
-                file_path = converted_path
-
-            nsfw = await check_nsfw_image(file_path)  # NSFW check for images
-        else:
-            nsfw = False  # Skip NSFW check for videos, GIFs, and documents
+        nsfw = await check_nsfw_image(file_path)
 
         if nsfw:
             name = event.sender.first_name
             await event.delete()
             
             await event.respond(
-                f"**⚠️ WARNING** (NSFW detected)\n**{name}** sent NSFW {media_type}."
+                f"**⚠️ ᴡᴀʀɴɪɴɢ** (ɴꜱꜰᴡ ᴅᴇᴛᴇᴄᴛᴇᴅ)\n**{name}** ꜱᴇɴᴛ ɴꜱꜰᴡ ɪᴍᴀɢᴇ."
             )
 
             if SPOILER:  
                 await event.respond(
                     file=file_path,
-                    message=f"**⚠️ WARNING** (NSFW detected)\n**{name}** sent NSFW {media_type}.",
+                    message=f"**⚠️ ᴡᴀʀɴɪɴɢ** (ɴꜱꜰᴡ ᴅᴇᴛᴇᴄᴛᴇᴅ)\n**{name}** ꜱᴇɴᴛ ɴꜱꜰᴡ ɪᴍᴀɢᴇ.",
                     spoiler=True
                 )
-        
-        # Clean up downloaded files
-        if os.path.exists(file_path):
-            os.remove(file_path)
+        os.remove(file_path)
 
     except Exception as e:
-        print(f"Error processing {media_type}: {e}")
+        print(f"ᴇʀʀᴏʀ ᴘʀᴏᴄᴇssɪɴɢ ɪᴍᴀɢᴇ: {e}") 
+
+can you make it for video stickers and gifs
 
 @BOT.on(events.NewMessage(func=lambda e: e.is_group and e.text))
 async def slang(event):
