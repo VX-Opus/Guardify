@@ -47,7 +47,7 @@ async def media_handler(event):
             await event.respond(warning_msg)
             
             if SPOILER:
-                await event.respond(f"||{warning_msg}||", file=file_path)
+                await event.respond(f"||{warning_msg}||")
         
         os.remove(file_path)
     except Exception as e:
