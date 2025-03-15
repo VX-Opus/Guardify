@@ -41,80 +41,98 @@ async def track_groups(event):
 # Check for edited messages
 @BOT.on(events.MessageEdited)
 async def check_edit(event):
-    chat = await event.get_chat()
-    user = await event.get_sender()
-
-    # Check if the user object is None
-    if user is None:
-        logger.error("Failed to retrieve the sender of the edited message.")
-        return
-
-    user_id = user.id
-    user_first_name = html.escape(user.first_name)
-    user_mention = f"<a href='tg://user?id={user_id}'>{user_first_name}</a>"
-
-    # Check if user is owner, sudo, or authorized in this group
-    is_owner = user_id == OWNER_ID
-    is_sudo = user_id in sudo_users
-    is_authorized = authorized_users_collection.find_one({"user_id": user_id, "group_id": chat.id})
-
-    if is_owner or is_sudo or is_authorized:
-        await BOT.send_message(
-            SUPPORT_ID,
-            f"<blockquote>Aᴜᴛʜᴏʀɪᴢᴇᴅ ᴜsᴇʀ {user_mention} ᴇᴅɪᴛᴇᴅ ᴀ ᴍᴇssᴀɢᴇ ɪɴ ᴄʜᴀᴛ <code>{chat.id}</code>.</blockquote>\n"
-            "<blockquote><b>Nᴏ ᴀᴄᴛɪᴏɴ ᴡᴀs ᴛᴀᴋᴇɴ.</b></blockquote>",
-            parse_mode='html'
-        )
-        return
-
-    # Try to check if the user is an admin
     try:
-        chat_member = await BOT.get_permissions(chat, user)
+        chat = await event.get_chat()
+        user = await event.get_sender()
 
-        if chat_member.is_admin or chat_member.is_creator:
+        # Check if the user object is None
+        if user is None:
+            error_msg = (
+                "<blockquote><b>⚠️ ꜰᴀɪʟᴇᴅ ᴛᴏ ʀᴇᴛʀɪᴇᴠᴇ ᴛʜᴇ ꜱᴇɴᴅᴇʀ ᴏꜰ ᴛʜᴇ ᴇᴅɪᴛᴇᴅ ᴍᴇꜱꜱᴀɢᴇ.</b><blockquote>\n"
+                f"<blockquote><b>ᴄʜᴀᴛ ɪᴅ: <code>{chat.id}</code></b></blockquote>\n"
+                f"<blockquote><b>ᴍᴇꜱꜱᴀɢᴇ ɪᴅ: <code>{event.id}</code></b></blockquote>\n"
+                "<blockquote><b>ᴛʜɪꜱ ᴍɪɢʜᴛ ʙᴇ ᴅᴜᴇ ᴛᴏ ᴀ ᴍᴇꜱꜱᴀɢᴇ ꜰʀᴏᴍ ᴀ ᴄʜᴀɴɴᴇʟ, ᴀɴᴏɴʏᴍᴏᴜꜱ ᴀᴅᴍɪɴ, ᴏʀ ᴅᴇʟᴇᴛᴇᴅ ᴀᴄᴄᴏᴜɴᴛ.</b></blockquote>"
+            )
+            logger.error(error_msg)
+            await BOT.send_message(SUPPORT_ID, error_msg, parse_mode='html')
+            return
+
+        user_id = user.id
+        user_first_name = html.escape(user.first_name)
+        user_mention = f"<a href='tg://user?id={user_id}'>{user_first_name}</a>"
+
+        # Check if user is owner, sudo, or authorized in this group
+        is_owner = user_id == OWNER_ID
+        is_sudo = user_id in sudo_users
+        is_authorized = authorized_users_collection.find_one({"user_id": user_id, "group_id": chat.id})
+
+        if is_owner or is_sudo or is_authorized:
             await BOT.send_message(
                 SUPPORT_ID,
-                f"<blockquote>Usᴇʀ {user_mention} is an <b>{chat_member.status}</b> ɪɴ ᴄʜᴀᴛ <code>{chat.id}</code>.</blockquote>\n"
-                "<blockquote><b>Nᴏ ᴅᴇʟᴇᴛɪᴏɴ ᴡᴀs ᴘᴇʀғᴏʀᴍᴇᴅ.</b></blockquote>",
+                f"<blockquote>Aᴜᴛʜᴏʀɪᴢᴇᴅ ᴜsᴇʀ {user_mention} ᴇᴅɪᴛᴇᴅ ᴀ ᴍᴇssᴀɢᴇ ɪɴ ᴄʜᴀᴛ <code>{chat.id}</code>.</blockquote>\n"
+                "<blockquote><b>Nᴏ ᴀᴄᴛɪᴏɴ ᴡᴀs ᴛᴀᴋᴇɴ.</b></blockquote>",
                 parse_mode='html'
             )
             return
 
+        # Try to check if the user is an admin
+        try:
+            chat_member = await BOT.get_permissions(chat, user)
+
+            if chat_member.is_admin or chat_member.is_creator:
+                await BOT.send_message(
+                    SUPPORT_ID,
+                    f"<blockquote>Usᴇʀ {user_mention} ɪꜱ ᴀɴ <b>{chat_member.status}</b> ɪɴ ᴄʜᴀᴛ <code>{chat.id}</code>.</blockquote>\n"
+                    "<blockquote><b>Nᴏ ᴅᴇʟᴇᴛɪᴏɴ ᴡᴀs ᴘᴇʀғᴏʀᴍᴇᴅ.</b></blockquote>",
+                    parse_mode='html'
+                )
+                return
+
+        except Exception as e:
+            error_msg = (
+                "<blockquote><b>⚠️ ʙᴏᴛ ɴᴇᴇᴅꜱ ᴀᴅᴍɪɴ ʀɪɢʜᴛꜱ ᴛᴏ ᴄʜᴇᴄᴋ ᴇᴅɪᴛꜱ</b></blockquote>\n"
+                f"<blockquote><b>ᴄʜᴀᴛ ɪᴅ: <code>{chat.id}</code></b></blockquote>\n"
+                f"<blockquote><b>ᴇʀʀᴏʀ: <code>{e}</code></b></blockquote>"
+            )
+            logger.error(error_msg)
+            await BOT.send_message(SUPPORT_ID, error_msg, parse_mode='html')
+            return
+
+        # Delete the unauthorized user's edited message
+        try:
+            await event.delete()
+
+            await BOT.send_message(
+                chat.id,
+                f"<blockquote><b>{user_mention} Jᴜsᴛ ᴇᴅɪᴛᴇᴅ ᴀ ᴍᴇssᴀɢᴇ.<b></blockquote>"
+                "<blockquote><b>ɪ ʜᴀᴠᴇ ᴅᴇʟᴇᴛᴇᴅ ɪᴛ.<b></blockquote>",
+                parse_mode='html'
+            )
+
+            await BOT.send_message(
+                SUPPORT_ID,
+                f"<blockquote><b>Dᴇʟᴇᴛᴇᴅ ᴇᴅɪᴛᴇᴅ ᴍᴇssᴀɢᴇ ғʀᴏᴍ ᴜɴᴀᴜᴛʜᴏʀɪᴢᴇᴅ ᴜsᴇʀ {user_mention}<b></blockquote>"
+                f"<blockquote><b>ɪɴ ᴄʜᴀᴛ <code>{chat.id}</code>.<b></blockquote>",
+                parse_mode='html'
+            )
+
+        except Exception as e:
+            error_msg = (
+                "<blockquote><b>⚠️ ꜰᴀɪʟᴇᴅ ᴛᴏ ᴅᴇʟᴇᴛᴇ ᴇᴅɪᴛᴇᴅ ᴍᴇꜱꜱᴀɢᴇ.</b></blockquote>\n"
+                f"<blockquote><b>ᴄʜᴀᴛ ɪᴅ: <code>{chat.id}</code></b></blockquote>\n"
+                f"<blockquote><b>ᴍᴇꜱꜱᴀɢᴇ ɪᴅ: <code>{event.id}</code></b></blockquote>\n"
+                f"<blockquote><b>ᴇʀʀᴏʀ: <code>{e}</code></b></blockquote>"
+            )
+            logger.error(error_msg)
+            await BOT.send_message(SUPPORT_ID, error_msg, parse_mode='html')
+
     except Exception as e:
-        await BOT.send_message(
-            SUPPORT_ID,
-            f"<blockquote>Bᴏᴛ ɴᴇᴇᴅs ᴀᴅᴍɪɴ ʀɪɢʜᴛs ɪɴ ᴄʜᴀᴛ <code>{chat.id}</code>.</blockquote>\n"
-            f"<blockquote><b>Cᴀɴɴᴏᴛ ᴄʜᴇᴄᴋ/ᴅᴇʟ ᴇᴅɪᴛs ғʀᴏᴍ {user_mention}.<b></blockquote>",
-            parse_mode='html'
+        error_msg = (
+            "<blockquote><b>⚠️ ᴜɴʜᴀɴᴅʟᴇᴅ ᴇxᴄᴇᴘᴛɪᴏɴ ɪɴ ᴄʜᴇᴄᴋ_ᴇᴅɪᴛ.</b></blockquote>\n"
+            f"<blockquote><b>ᴇʀʀᴏʀ: <code>{e}</code></b></blockquote>"
         )
-        return
-
-    # Delete the unauthorized user's edited message
-    try:
-        await event.delete()
-
-        await BOT.send_message(
-            chat.id,
-            f"<blockquote><b>{user_mention} Jᴜsᴛ ᴇᴅɪᴛᴇᴅ ᴀ ᴍᴇssᴀɢᴇ.<b></blockquote>"
-            "<blockquote><b>ɪ ʜᴀᴠᴇ ᴅᴇʟᴇᴛᴇᴅ ɪᴛ.<b></blockquote>",
-            parse_mode='html'
-        )
-
-        await BOT.send_message(
-            SUPPORT_ID,
-            f"<blockquote><b>Dᴇʟᴇᴛᴇᴅ ᴇᴅɪᴛᴇᴅ ᴍᴇssᴀɢᴇ ғʀᴏᴍ ᴜɴᴀᴜᴛʜᴏʀɪᴢᴇᴅ ᴜsᴇʀ {user_mention}<b></blockquote>"
-            f"<blockquote><b>ɪɴ ᴄʜᴀᴛ <code>{chat.id}</code>.<b></blockquote>",
-            parse_mode='html'
-        )
-
-    except Exception as e:
-        await BOT.send_message(
-            SUPPORT_ID,
-            f"<blockquote><b>Fᴀɪʟᴇᴅ ᴛᴏ ᴅᴇʟᴇᴛᴇ ᴍᴇssᴀɢᴇ! Mᴀᴋᴇ sᴜʀᴇ ʙᴏᴛ ʜᴀs ᴅᴇʟᴇᴛᴇ ᴍᴇssᴀɢᴇ ᴀɴᴅ ɪɴᴠɪᴛᴇ ᴜsᴇʀs ʀɪɢʜᴛs.<b></blockquote>\n"
-            f"<blockquote><b>Mᴇssᴀɢᴇ ID: <code>{event.id}</code> ɪɴ ᴄʜᴀᴛ <code>{chat.id}</code>.<b></blockquote>\n"
-            f"<blockquote><b><code>{e}</code><b></blockquote>",
-            parse_mode='html'
-        )
+        logger.error(error_msg)
+        await BOT.send_message(SUPPORT_ID, error_msg, parse_mode='markdown')
 
 # Add sudo user
 @BOT.on(events.NewMessage(pattern='/addsudo'))
