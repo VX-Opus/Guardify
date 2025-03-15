@@ -1,7 +1,7 @@
 from telethon import TelegramClient, events
 from telethon.tl.types import PeerChannel, PeerChat
 import torch
-from transformers import AutoFeatureExtractor, AutoModelForImageClassification
+from transformers import AutoImageProcessor, AutoModelForImageClassification
 from PIL import Image
 import os
 import re
@@ -16,7 +16,7 @@ with open(slangf, 'r') as f:
     slang_words = set(line.strip().lower() for line in f)
 
 model_name = "AdamCodd/vit-base-nsfw-detector"
-feature_extractor = AutoFeatureExtractor.from_pretrained(model_name)
+feature_extractor = AutoImageProcessor.from_pretrained(model_name)
 model = AutoModelForImageClassification.from_pretrained(model_name)
 
 def process_image(image_path):
@@ -34,7 +34,7 @@ def process_image(image_path):
 async def check_nsfw_media(file_path):
     return await asyncio.to_thread(process_image, file_path)
 
-@BOT.on(events.NewMessage(func=lambda e: e.is_group and (e.photo)))
+@BOT.on(events.NewMessage(func=lambda e: e.is_group and (e.photo or e.gif or e.video)))
 async def media_handler(event):
     try:
         file_path = await event.download_media()
@@ -43,7 +43,7 @@ async def media_handler(event):
         if nsfw:
             name = event.sender.first_name
             await event.delete()
-            warning_msg = f"**⚠️ ɴꜱꜰᴡ ᴅᴇᴛᴇᴄᴛᴇᴅ**\n{name},ʏᴏᴜʀ ᴍᴇᴅɪᴀ ᴡᴀꜱ ʀᴇᴍᴏᴠᴇᴅ."
+            warning_msg = f"**⚠️ ɴꜱꜰᴡ ᴅᴇᴛᴇᴄᴛᴇᴅ**\n{name}, ʏᴏᴜʀ ᴍᴇᴅɪᴀ ᴡᴀꜱ ʀᴇᴍᴏᴠᴇᴅ.."
             await event.respond(warning_msg)
             
             if SPOILER:
@@ -51,7 +51,7 @@ async def media_handler(event):
         
         os.remove(file_path)
     except Exception as e:
-        print(f"ᴇʀʀᴏʀ ᴘʀᴏᴄᴇꜱꜱɪɴɢ ᴍᴇᴅɪᴀ: {e}")
+        print(f"ᴇʀʀᴏʀ: {e}")
 
 slang_pattern = re.compile(r'\b(' + '|'.join(re.escape(word) for word in slang_words) + r')\b', re.IGNORECASE)
 
