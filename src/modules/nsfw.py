@@ -16,7 +16,7 @@ with open(slangf, 'r') as f:
     slang_words = set(line.strip().lower() for line in f)
 
 model_name = "AdamCodd/vit-base-nsfw-detector"
-feature_extractor = AutoImageProcessor.from_pretrained(model_name)
+feature_extractor = AutoImageProcessor.from_pretrained(model_name, use_fast=True)
 model = AutoModelForImageClassification.from_pretrained(model_name)
 
 def process_image(image_path):
@@ -43,11 +43,11 @@ async def media_handler(event):
         if nsfw:
             name = event.sender.first_name
             await event.delete()
-            warning_msg = f"**⚠️ ɴꜱꜰᴡ ᴅᴇᴛᴇᴄᴛᴇᴅ**\n{name}, ʏᴏᴜʀ ᴍᴇᴅɪᴀ ᴡᴀꜱ ʀᴇᴍᴏᴠᴇᴅ.."
+            warning_msg = f"**⚠️ ɴꜱꜰᴡ ᴅᴇᴛᴇᴄᴛᴇᴅ**\n{name}, ʏᴏᴜʀ ᴍᴇᴅɪᴀ ᴡᴀꜱ ʀᴇᴍᴏᴠᴇᴅ."
             await event.respond(warning_msg)
             
             if SPOILER:
-                await event.respond(file=file_path, message=warning_msg, spoiler=True)
+                await event.respond(f"||{warning_msg}||", file=file_path)
         
         os.remove(file_path)
     except Exception as e:
