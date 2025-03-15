@@ -100,7 +100,7 @@ async def chk_usr(event):
 
 @BOT.on(events.NewMessage(pattern=r"/pretender(?: |$)(.*)"))
 @is_admin
-async def set_mataa(event):
+async def set_mataa(event, _s):  # Accept _s argument
     if event.is_group:
         admin_ids = [user.id async for user in BOT.iter_participants(event.chat_id, filter=ChannelParticipantsAdmins)]
         if event.sender_id not in admin_ids:
@@ -112,7 +112,7 @@ async def set_mataa(event):
         if command == "on":
             cekset = await check_pretender(chat_id)
             if cekset:
-                await event.reply(f"ᴘʀᴇᴛᴇɴᴅᴇʀ ɪs ᴀʟʀᴇᴀᴅʏ ᴇɴᴀʙʟᴇᴅ ғᴏʀ {event.chat.title}")
+                await event.reply(f"ᴘʀᴇᴛᴇɴᴅᴇʀ ɪs ᴀʟʀᴇᴀᴅʏ �ᴇɴᴀʙʟᴇᴅ ғᴏʀ {event.chat.title}")
             else:
                 await impo_on(chat_id)
                 await event.reply(f"sᴜᴄᴇssғᴜʟʟʏ ᴇɴᴀʙʟᴇᴅ ᴘʀᴇᴛᴇɴᴅᴇʀ ғᴏʀ {event.chat.title}")
