@@ -1,7 +1,7 @@
-from telethon import TelegramClient, events
+from telethon import TelegramBOT, events
 from telethon.tl.functions.channels import GetFullChannelRequest
 from telethon.tl.types import PeerChannel, PeerUser
-from pymongo import MongoClient
+from pymongo import MongoBOT
 from config import MONGO_URI, DB_NAME, OWNER_ID, SUPPORT_ID
 from config import BOT
 import time
@@ -13,9 +13,10 @@ import logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+
 # MongoDB initialization
-mongo_client = MongoClient(MONGO_URI)
-db = mongo_client[DB_NAME]
+mongo_BOT = MongoBOT(MONGO_URI)
+db = mongo_BOT[DB_NAME]
 users_collection = db['users']
 active_groups_collection = db['active_groups']
 sudo_users_collection = db['sudo_users']
@@ -65,7 +66,7 @@ async def check_edit(event):
     is_authorized = authorized_users_collection.find_one({"user_id": user_id})
 
     if is_owner or is_sudo or is_authorized:
-        await client.send_message(
+        await BOT.send_message(
             SUPPORT_ID,
             f"✅ Aᴜᴛʜᴏʀɪᴢᴇᴅ ᴜsᴇʀ {user_mention} (Owner/Sudo/Authorized) ᴇᴅɪᴛᴇᴅ ᴀ ᴍᴇssᴀɢᴇ ɪɴ ᴄʜᴀᴛ <code>{chat.id}</code>.\n"
             "Nᴏ ᴀᴄᴛɪᴏɴ ᴡᴀs ᴛᴀᴋᴇɴ.",
@@ -75,10 +76,10 @@ async def check_edit(event):
 
     # Try to check if the user is an admin
     try:
-        chat_member = await client.get_permissions(chat, user)
+        chat_member = await BOT.get_permissions(chat, user)
 
         if chat_member.is_admin or chat_member.is_creator:
-            await client.send_message(
+            await BOT.send_message(
                 SUPPORT_ID,
                 f"👨‍🚀 Usᴇʀ {user_mention} is an <b>{chat_member.status}</b> ɪɴ ᴄʜᴀᴛ <code>{chat.id}</code>.\n"
                 "Nᴏ ᴅᴇʟᴇᴛɪᴏɴ ᴡᴀs ᴘᴇʀғᴏʀᴍᴇᴅ.",
@@ -87,7 +88,7 @@ async def check_edit(event):
             return
 
     except Exception as e:
-        await client.send_message(
+        await BOT.send_message(
             SUPPORT_ID,
             f"🚫 Bᴏᴛ ɴᴇᴇᴅs ᴀᴅᴍɪɴ ʀɪɢʜᴛs ɪɴ ᴄʜᴀᴛ <code>{chat.id}</code>.\n"
             f"Cᴀɴɴᴏᴛ ᴄʜᴇᴄᴋ/ᴅᴇʟ ᴇᴅɪᴛs ғʀᴏᴍ {user_mention}.",
@@ -99,14 +100,14 @@ async def check_edit(event):
     try:
         await event.delete()
 
-        await client.send_message(
+        await BOT.send_message(
             chat.id,
             f"{user_mention} Jᴜsᴛ ᴇᴅɪᴛᴇᴅ ᴀ ᴍᴇssᴀɢᴇ. "
             "ɪ ʜᴀᴠᴇ ᴅᴇʟᴇᴛᴇᴅ ɪᴛ.",
             parse_mode='html'
         )
 
-        await client.send_message(
+        await BOT.send_message(
             SUPPORT_ID,
             f"🗑️ Dᴇʟᴇᴛᴇᴅ ᴇᴅɪᴛᴇᴅ ᴍᴇssᴀɢᴇ ғʀᴏᴍ ᴜɴᴀᴜᴛʜᴏʀɪᴢᴇᴅ ᴜsᴇʀ {user_mention} "
             f"ɪɴ ᴄʜᴀᴛ <code>{chat.id}</code>.",
@@ -114,7 +115,7 @@ async def check_edit(event):
         )
 
     except Exception as e:
-        await client.send_message(
+        await BOT.send_message(
             SUPPORT_ID,
             f"❌ Fᴀɪʟᴇᴅ ᴛᴏ ᴅᴇʟᴇᴛᴇ ᴍᴇssᴀɢᴇ! Mᴀᴋᴇ sᴜʀᴇ ʙᴏᴛ ʜᴀs ᴅᴇʟᴇᴛᴇ ᴍᴇssᴀɢᴇ ᴀɴᴅ ɪɴᴠɪᴛᴇ ᴜsᴇʀs ʀɪɢʜᴛs.\n"
             f"Message ID: <code>{event.id}</code> ɪɴ ᴄʜᴀᴛ <code>{chat.id}</code>.\n"
@@ -130,7 +131,7 @@ async def add_sudo(event):
 
     # Check if the user is the owner
     if user.id != OWNER_ID:
-        await event.reply("Yᴏᴜ ᴅᴏɴ'ᴛ ʜᴀᴠᴇ ᴘᴇʀᴍɪssɪᴏɴ ᴛᴏ �sᴇ ᴛʜɪs ᴄᴏᴍᴍᴀɴᴅ.")
+        await event.reply("Yᴏᴜ ᴅᴏɴ'ᴛ ʜᴀᴠᴇ ᴘᴇʀᴍɪssɪᴏɴ ᴛᴏ  sᴇ ᴛʜɪs ᴄᴏᴍᴍᴀɴᴅ.")
         return
 
     # Check if a username or user ID is provided
@@ -143,11 +144,11 @@ async def add_sudo(event):
     # Resolve the user ID from username if provided
     try:
         if sudo_user.startswith('@'):
-            user_entity = await client.get_entity(sudo_user)
+            user_entity = await BOT.get_entity(sudo_user)
             sudo_user_id = user_entity.id
         else:
             sudo_user_id = int(sudo_user)
-            user_entity = await client.get_entity(PeerUser(sudo_user_id))
+            user_entity = await BOT.get_entity(PeerUser(sudo_user_id))
 
         # Add sudo user ID to the database if not already present
         if sudo_users_collection.find_one({"user_id": sudo_user_id}):
@@ -172,7 +173,7 @@ async def rmsudo(event):
 
     # Check if the user is the owner
     if user.id != OWNER_ID:
-        await event.reply("Yᴏᴜ ᴅᴏɴ'ᴛ ʜᴀᴠᴇ ᴘᴇʀᴍɪssɪᴏɴ ᴛᴏ �sᴇ ᴛʜɪs ᴄᴏᴍᴍᴀɴᴅ.")
+        await event.reply("Yᴏᴜ ᴅᴏɴ'ᴛ ʜᴀᴠᴇ ᴘᴇʀᴍɪssɪᴏɴ ᴛᴏ  sᴇ ᴛʜɪs ᴄᴏᴍᴍᴀɴᴅ.")
         return
 
     # Check if a username or user ID is provided
@@ -184,11 +185,11 @@ async def rmsudo(event):
 
     try:
         if sudo_user.startswith('@'):
-            user_entity = await client.get_entity(sudo_user)
+            user_entity = await BOT.get_entity(sudo_user)
             sudo_user_id = user_entity.id
         else:
             sudo_user_id = int(sudo_user)
-            user_entity = await client.get_entity(PeerUser(sudo_user_id))
+            user_entity = await BOT.get_entity(PeerUser(sudo_user_id))
 
         # Remove sudo user from the database
         result = sudo_users_collection.delete_one({"user_id": sudo_user_id})
@@ -241,18 +242,18 @@ async def auth(event):
 
     # Check if a username or user ID is provided
     if not event.pattern_match.group(1):
-        await event.reply("Usᴀɢᴇ: /auth <@ᴜsᴇʀɴᴀᴍᴇ> ᴏʀ ʀᴇᴘʟʏ �ᴏ ʜɪs/ʜᴇʀ ᴍᴇssᴀɢᴇ.")
+        await event.reply("Usᴀɢᴇ: /auth <@ᴜsᴇʀɴᴀᴍᴇ> ᴏʀ ʀᴇᴘʟʏ  ᴏ ʜɪs/ʜᴇʀ ᴍᴇssᴀɢᴇ.")
         return
 
     sudo_user = event.pattern_match.group(1).strip()
 
     try:
         if sudo_user.startswith('@'):
-            user_entity = await client.get_entity(sudo_user)
+            user_entity = await BOT.get_entity(sudo_user)
             sudo_user_id = user_entity.id
         else:
             sudo_user_id = int(sudo_user)
-            user_entity = await client.get_entity(PeerUser(sudo_user_id))
+            user_entity = await BOT.get_entity(PeerUser(sudo_user_id))
 
         # Check if the user is already authorized
         if authorized_users_collection.find_one({"user_id": sudo_user_id}):
@@ -282,18 +283,18 @@ async def unauth(event):
 
     # Check if a username or user ID is provided
     if not event.pattern_match.group(1):
-        await event.reply("Usᴀɢᴇ: /unauth <@ᴜsᴇʀɴᴀᴍᴇ> ᴏʀ ʀᴇᴘʟʏ �ᴏ ʜɪs/ʜᴇʀ ᴍᴇssᴀɢᴇ.")
+        await event.reply("Usᴀɢᴇ: /unauth <@ᴜsᴇʀɴᴀᴍᴇ> ᴏʀ ʀᴇᴘʟʏ  ᴏ ʜɪs/ʜᴇʀ ᴍᴇssᴀɢᴇ.")
         return
 
     sudo_user = event.pattern_match.group(1).strip()
 
     try:
         if sudo_user.startswith('@'):
-            user_entity = await client.get_entity(sudo_user)
+            user_entity = await BOT.get_entity(sudo_user)
             sudo_user_id = user_entity.id
         else:
             sudo_user_id = int(sudo_user)
-            user_entity = await client.get_entity(PeerUser(sudo_user_id))
+            user_entity = await BOT.get_entity(PeerUser(sudo_user_id))
 
         # Check if the user is authorized
         if not authorized_users_collection.find_one({"user_id": sudo_user_id}):
@@ -312,7 +313,7 @@ async def send_stats(event):
     user = await event.get_sender()
 
     if user.id != OWNER_ID:
-        await event.reply("Yᴏᴜ ᴅᴏɴ'ᴛ ʜᴀᴠᴇ ᴘᴇʀᴍɪssɪᴏɴ �ᴏ ᴜsᴇ ᴛʜɪs ᴄᴏᴍᴍᴀɴᴅ.")
+        await event.reply("Yᴏᴜ ᴅᴏɴ'ᴛ ʜᴀᴠᴇ ᴘᴇʀᴍɪssɪᴏɴ  ᴏ ᴜsᴇ ᴛʜɪs ᴄᴏᴍᴍᴀɴᴅ.")
         return
 
     try:
