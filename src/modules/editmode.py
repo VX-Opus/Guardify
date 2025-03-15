@@ -1,4 +1,4 @@
-from telethon import TelegramBOT, events
+from telethon import events
 from telethon.tl.functions.channels import GetFullChannelRequest
 from telethon.tl.types import PeerChannel, PeerUser
 from pymongo import MongoBOT
