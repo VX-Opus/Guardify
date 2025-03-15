@@ -34,7 +34,7 @@ def process_image(image_path):
 async def check_nsfw_media(file_path):
     return await asyncio.to_thread(process_image, file_path)
 
-@BOT.on(events.NewMessage(func=lambda e: e.is_group and (e.photo or e.gif or e.video)))
+@BOT.on(events.NewMessage(func=lambda e: e.is_group and (e.photo)))
 async def media_handler(event):
     try:
         file_path = await event.download_media()
