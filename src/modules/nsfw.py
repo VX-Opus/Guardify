@@ -18,7 +18,6 @@ model_name = "AdamCodd/vit-base-nsfw-detector"
 feature_extractor = AutoFeatureExtractor.from_pretrained(model_name)
 model = AutoModelForImageClassification.from_pretrained(model_name)
 
-# NSFW detection function
 async def check_nsfw_image(image_path):
     try:
         image = Image.open(image_path)
@@ -34,39 +33,32 @@ async def check_nsfw_image(image_path):
         print(f"ᴇʀʀᴏʀ ᴘʀᴏᴄᴇꜱꜱɪɴɢ ɪᴍᴀɢᴇ: {e}")
         return False
 
-@BOT.on(events.NewMessage(func=lambda e: e.is_group and e.photo))
-async def image(event):
-    sender = await BOT.get_permissions(event.chat_id, event.sender_id)
-    isadmin = sender.is_admin
+@BOT.on(events.NewMessage(func=lambda e: e.is_group and (e.photo or e.video or e.sticker or e.gif or e.document)))
+async def media_handler(event):
+    try:
+        file_path = await event.download_media()
 
-    if not isadmin:
-        try:
-            photo = event.photo
-            print(f"ᴅᴏᴡɴʟᴏᴀᴅɪɴɢ ɪᴍᴀɢᴇ ᴡɪᴛʜ ꜰɪʟᴇ ɪᴅ: {photo.id}")
+        nsfw = await check_nsfw_media(file_path) 
 
-            file_path = await event.download_media()
-            print(f"ɪᴍᴀɢᴇ ᴅᴏᴡɴʟᴏᴀᴅᴇᴅ ᴛᴏ: {file_path}")
+        if nsfw:
+            name = event.sender.first_name
+            await event.delete() 
 
-            nsfw = await check_nsfw_image(file_path)
+            await event.respond(
+                f"**⚠️ ᴡᴀʀɴɪɴɢ** (ɴꜱꜰᴡ ᴅᴇᴛᴇᴄᴛᴇᴅ)\n**{name}** ꜱᴇɴᴛ ɴꜱꜰᴡ ᴍᴇᴅɪᴀ."
+            )
 
-            if nsfw:
-                name = event.sender.first_name
-                await event.delete()
-                
+            if SPOILER:
                 await event.respond(
-                    f"**⚠️ ᴡᴀʀɴɪɴɢ** (ɴꜱꜰᴡ ᴅᴇᴛᴇᴄᴛᴇᴅ)\n**{name}** ꜱᴇɴᴛ ɴꜱꜰᴡ ɪᴍᴀɢᴇ."
+                    file=file_path,
+                    message=f"**⚠️ ᴡᴀʀɴɪɴɢ** (ɴꜱꜰᴡ ᴅᴇᴛᴇᴄᴛᴇᴅ)\n**{name}** ꜱᴇɴᴛ ɴꜱꜰᴡ ᴍᴇᴅɪᴀ.",
+                    spoiler=True 
                 )
+                
+        os.remove(file_path)
 
-                if SPOILER:  
-                    await event.respond(
-                        file=file_path,
-                        message=f"**⚠️ ᴡᴀʀɴɪɴɢ** (ɴꜱꜰᴡ ᴅᴇᴛᴇᴄᴛᴇᴅ)\n**{name}** ꜱᴇɴᴛ ɴꜱꜰᴡ ɪᴍᴀɢᴇ.",
-                        spoiler=True
-                    )
-            os.remove(file_path)
-
-        except Exception as e:
-            print(f"ᴇʀʀᴏʀ pʀᴏᴄᴇssɪɴɢ ɪᴍᴀɢᴇ: {e}")
+    except Exception as e:
+        pass  # Silently handle 
 
 @BOT.on(events.NewMessage(func=lambda e: e.is_group and e.text))
 async def slang(event):
