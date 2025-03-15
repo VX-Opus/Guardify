@@ -12,7 +12,7 @@ def is_admin(func):
             except:
                 is_admin = False
         if is_admin:
-            await func(event, _s)  # Pass all arguments
+            await func(event, _s)
         else:
             await event.reply("ᴏɴʟʏ ᴀᴅᴍɪɴꜱ ᴄᴀɴ ᴇxᴇᴄᴜᴛᴇ ᴛʜɪꜱ ᴄᴏᴍᴍᴀɴᴅ!")
     return a_c
