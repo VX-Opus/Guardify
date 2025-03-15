@@ -5,6 +5,7 @@ from transformers import AutoFeatureExtractor, AutoModelForImageClassification
 from PIL import Image
 import os
 import re
+import asyncio
 import config
 from config import BOT
 
@@ -18,73 +19,54 @@ model_name = "AdamCodd/vit-base-nsfw-detector"
 feature_extractor = AutoFeatureExtractor.from_pretrained(model_name)
 model = AutoModelForImageClassification.from_pretrained(model_name)
 
-async def check_nsfw_image(image_path):
+def process_image(image_path):
     try:
-        image = Image.open(image_path)
+        image = Image.open(image_path).convert("RGB")
         inputs = feature_extractor(images=image, return_tensors="pt")
-
         with torch.no_grad():
             outputs = model(**inputs)
             logits = outputs.logits
-            predicted_class = torch.argmax(logits, dim=-1).item()
-
-        return predicted_class == 1 
+            return torch.argmax(logits, dim=-1).item() == 1
     except Exception as e:
         print(f"ᴇʀʀᴏʀ ᴘʀᴏᴄᴇꜱꜱɪɴɢ ɪᴍᴀɢᴇ: {e}")
         return False
 
+async def check_nsfw_media(file_path):
+    return await asyncio.to_thread(process_image, file_path)
+
 @BOT.on(events.NewMessage(func=lambda e: e.is_group and (e.photo)))
-async def image(event):
+async def media_handler(event):
     try:
-        photo = event.photo
-        print(f"ᴅᴏᴡɴʟᴏᴀᴅɪɴɢ ɪᴍᴀɢᴇ ᴡɪᴛʜ ꜰɪʟᴇ ɪᴅ: {photo.id}")
-
         file_path = await event.download_media()
-        print(f"ɪᴍᴀɢᴇ ᴅᴏᴡɴʟᴏᴀᴅᴇᴅ ᴛᴏ: {file_path}")
-
-        nsfw = await check_nsfw_image(file_path)
-
+        nsfw = await check_nsfw_media(file_path)
+        
         if nsfw:
             name = event.sender.first_name
             await event.delete()
+            warning_msg = f"**⚠️ ɴꜱꜰᴡ ᴅᴇᴛᴇᴄᴛᴇᴅ**\n{name},ʏᴏᴜʀ ᴍᴇᴅɪᴀ ᴡᴀꜱ ʀᴇᴍᴏᴠᴇᴅ."
+            await event.respond(warning_msg)
             
-            await event.respond(
-                f"**⚠️ ᴡᴀʀɴɪɴɢ** (ɴꜱꜰᴡ ᴅᴇᴛᴇᴄᴛᴇᴅ)\n**{name}** ꜱᴇɴᴛ ɴꜱꜰᴡ ɪᴍᴀɢᴇ."
-            )
-
-            if SPOILER:  
-                await event.respond(
-                    file=file_path,
-                    message=f"**⚠️ ᴡᴀʀɴɪɴɢ** (ɴꜱꜰᴡ ᴅᴇᴛᴇᴄᴛᴇᴅ)\n**{name}** ꜱᴇɴᴛ ɴꜱꜰᴡ ɪᴍᴀɢᴇ.",
-                    spoiler=True
-                )
+            if SPOILER:
+                await event.respond(file=file_path, message=warning_msg, spoiler=True)
+        
         os.remove(file_path)
-
     except Exception as e:
-        print(f"ᴇʀʀᴏʀ ᴘʀᴏᴄᴇssɪɴɢ ɪᴍᴀɢᴇ: {e}") 
+        print(f"ᴇʀʀᴏʀ ᴘʀᴏᴄᴇꜱꜱɪɴɢ ᴍᴇᴅɪᴀ: {e}")
 
-can you make it for video stickers and gifs
+slang_pattern = re.compile(r'\b(' + '|'.join(re.escape(word) for word in slang_words) + r')\b', re.IGNORECASE)
 
 @BOT.on(events.NewMessage(func=lambda e: e.is_group and e.text))
-async def slang(event):
+async def slang_filter(event):
     sender = await BOT.get_permissions(event.chat_id, event.sender_id)
-    isadmin = sender.is_admin
-    if not isadmin:
-        sentence = event.text
-        sent = re.sub(r'\W+', ' ', sentence)
-        isslang = False
-        for word in sent.split():
-            if word.lower() in slang_words:
-                isslang = True
-                await event.delete()
-                sentence = sentence.replace(word, f'||{word}||')
-        
-        if isslang:
-            name = event.sender.first_name
-            msgtxt = f"""{name} ʏᴏᴜʀ ᴍᴇꜱꜱᴀɢᴇ ʜᴀꜱ ʙᴇᴇɴ ᴅᴇʟᴇᴛᴇᴅ ᴅᴜᴇ ᴛᴏ ᴛʜᴇ ᴘʀᴇꜱᴇɴᴄᴇ ᴏꜰ ɪɴᴀᴘᴘʀᴏᴘɪᴀᴛᴇ ʟᴀɴɢᴜᴀɢᴇ[ɢᴀᴀʟɪ/ꜱʟᴀɴɢꜰᴜʟ ᴡᴏʀᴅꜱ]. ʜᴇʀᴇ ɪꜱ ᴀ ᴄᴇɴꜱᴏʀᴇᴅ ᴠᴇʀꜱɪᴏɴ ᴏꜰ ʏᴏᴜʀ ᴍᴇꜱꜱᴀɢᴇ:
-
-{sentence}
-            """
-
-            if SPOILER:
-                await event.respond(msgtxt)
+    if sender.is_admin:
+        return
+    
+    sentence = event.text
+    censored_sentence = slang_pattern.sub(lambda m: f'||{m.group()}||', sentence)
+    
+    if sentence != censored_sentence:
+        await event.delete()
+        name = event.sender.first_name
+        msgtxt = f"{name}, ʏᴏᴜʀ ᴍᴇꜱꜱᴀɢᴇ ᴡᴀꜱ ᴅᴇʟᴇᴛᴇᴅ ᴅᴜᴇ ᴛᴏ ɪɴᴀᴘᴘʀᴏᴘʀɪᴀᴛᴇ ʟᴀɴɢᴜᴀɢᴇ. ʜᴇʀᴇ ɪꜱ ᴀ ᴄᴇɴꜱᴏʀᴇᴅ ᴠᴇʀꜱɪᴏɴ:\n\n{censored_sentence}"
+        if SPOILER:
+            await event.respond(msgtxt)
