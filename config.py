@@ -24,7 +24,7 @@ MONGO_URI = "mongodb+srv://kunaalkumar0091:6qhyyQIyS2idoGFQ@cluster0.z2jge.mongo
 DB_NAME = "kunaalkumar0091"
 LOGGER = False
 BOT_NAME = "Guardify"
-SUPPORT_ID = -1002440907656
+SUPPORT_ID = -1002064111110
 BOT_TOKEN = getenv("BOT_TOKEN", default=None)
 
 # Initialize the bot client
