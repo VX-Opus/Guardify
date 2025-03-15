@@ -43,6 +43,12 @@ async def track_groups(event):
 async def check_edit(event):
     chat = await event.get_chat()
     user = await event.get_sender()
+
+    # Check if the user object is None
+    if user is None:
+        logger.error("Failed to retrieve the sender of the edited message.")
+        return
+
     user_id = user.id
     user_first_name = html.escape(user.first_name)
     user_mention = f"<a href='tg://user?id={user_id}'>{user_first_name}</a>"
