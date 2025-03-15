@@ -33,7 +33,7 @@ async def check_nsfw_image(image_path):
         print(f"ᴇʀʀᴏʀ ᴘʀᴏᴄᴇꜱꜱɪɴɢ ɪᴍᴀɢᴇ: {e}")
         return False
 
-@BOT.on(events.NewMessage(func=lambda e: e.is_group and e.photo))
+@BOT.on(events.NewMessage(func=lambda e: e.is_group and (e.photo or e.video or e.sticker or e.gif or e.document)))
 async def image(event):
     try:
         photo = event.photo
