@@ -2,7 +2,7 @@ import functools
 
 def is_admin(func):
     @functools.wraps(func)
-    async def a_c(event, *args, **kwargs):
+    async def a_c(event):
         is_admin = False
         if not event.is_private:
             try:
