@@ -217,7 +217,7 @@ async def sudo_list(event):
         await event.reply(text, parse_mode='markdown')
 
 # Authorize a user in a specific group
-@BOT.on(events.NewMessage(pattern='/auth'))
+@BOT.on(events.NewMessage(pattern='/auth(?: |$)(.*)'))
 async def auth(event):
     user = await event.get_sender()
     chat = await event.get_chat()
@@ -227,14 +227,15 @@ async def auth(event):
         await event.reply("Yᴏᴜ ᴅᴏɴ'ᴛ ʜᴀᴠᴇ ᴘᴇʀᴍɪssɪᴏɴ ᴛᴏ ᴜsᴇ ᴛʜɪs ᴄᴏᴍᴍᴀɴᴅ.")
         return
 
-    # Check if a username or user ID is provided
-    if not event.pattern_match.group(1):
-        await event.reply("Usᴀɢᴇ: /auth <@ᴜsᴇʀɴᴀᴍᴇ> ᴏʀ ʀᴇᴘʟʏ  ᴏ ʜɪs/ʜᴇʀ ᴍᴇssᴀɢᴇ.")
+    # Extract the username or user ID from the command
+    sudo_user = event.pattern_match.group(1).strip() if event.pattern_match.group(1) else None
+
+    if not sudo_user:
+        await event.reply("Usᴀɢᴇ: /auth <@ᴜsᴇʀɴᴀᴍᴇ> ᴏʀ ʀᴇᴘʟʏ ᴛᴏ ʜɪs/ʜᴇʀ ᴍᴇssᴀɢᴇ.")
         return
 
-    sudo_user = event.pattern_match.group(1).strip()
-
     try:
+        # Resolve the user ID from username or user ID
         if sudo_user.startswith('@'):
             user_entity = await BOT.get_entity(sudo_user)
             sudo_user_id = user_entity.id
