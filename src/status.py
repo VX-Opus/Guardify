@@ -1,3 +1,5 @@
+import functools
+
 def is_admin(func):
     @functools.wraps(func)
     async def a_c(event, *args, **kwargs):
