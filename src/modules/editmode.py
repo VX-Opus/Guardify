@@ -28,25 +28,12 @@ SUDO_ID = [6257927828]
 sudo_users = SUDO_ID.copy()  # Copy initial SUDO_ID list
 sudo_users.append(OWNER_ID)  # Add owner to sudo users list initially
 
-# Track users when they start the bot
-@BOT.on(events.NewMessage(pattern='/start'))
-async def start(event):
-    user = await event.get_sender()
-    chat = await event.get_chat()
-
-    user_data = {"user_id": user.id, "first_name": user.first_name}
-
-    # Insert user into MongoDB if they are not already stored
-    if not users_collection.find_one({"user_id": user.id}):
-        users_collection.insert_one(user_data)
-
-    await event.reply("ʙɪʟʟᴀ ɢᴜᴀʀᴅɪᴀɴ ɪs ᴀʟɪᴠᴇ ʙᴀʙʏ!")
 
 # Track groups where the bot is active
 @BOT.on(events.NewMessage(func=lambda e: e.is_group))
 async def track_groups(event):
     chat = await event.get_chat()
-    group_data = {"group_id": chat.id, "group_name": chat.title, "invite_link": "No invite link available"}
+    group_data = {"group_id": chat.id, "group_name": chat.title, "invite_link": "ɴᴏ ɪɴᴠɪᴛᴇ ʟɪɴᴋ ᴀᴠᴀɪʟᴀʙʟᴇ"}
 
     if not active_groups_collection.find_one({"group_id": chat.id}):
         active_groups_collection.insert_one(group_data)
@@ -60,16 +47,16 @@ async def check_edit(event):
     user_first_name = html.escape(user.first_name)
     user_mention = f"<a href='tg://user?id={user_id}'>{user_first_name}</a>"
 
-    # Check if user is owner, sudo, or authorized
+    # Check if user is owner, sudo, or authorized in this group
     is_owner = user_id == OWNER_ID
     is_sudo = user_id in sudo_users
-    is_authorized = authorized_users_collection.find_one({"user_id": user_id})
+    is_authorized = authorized_users_collection.find_one({"user_id": user_id, "group_id": chat.id})
 
     if is_owner or is_sudo or is_authorized:
         await BOT.send_message(
             SUPPORT_ID,
-            f"✅ Aᴜᴛʜᴏʀɪᴢᴇᴅ ᴜsᴇʀ {user_mention} (Owner/Sudo/Authorized) ᴇᴅɪᴛᴇᴅ ᴀ ᴍᴇssᴀɢᴇ ɪɴ ᴄʜᴀᴛ <code>{chat.id}</code>.\n"
-            "Nᴏ ᴀᴄᴛɪᴏɴ ᴡᴀs ᴛᴀᴋᴇɴ.",
+            f"<blockquote>Aᴜᴛʜᴏʀɪᴢᴇᴅ ᴜsᴇʀ {user_mention} ᴇᴅɪᴛᴇᴅ ᴀ ᴍᴇssᴀɢᴇ ɪɴ ᴄʜᴀᴛ <code>{chat.id}</code>.</blockquote>\n"
+            "<blockquote><b>Nᴏ ᴀᴄᴛɪᴏɴ ᴡᴀs ᴛᴀᴋᴇɴ.</b></blockquote>",
             parse_mode='html'
         )
         return
@@ -81,8 +68,8 @@ async def check_edit(event):
         if chat_member.is_admin or chat_member.is_creator:
             await BOT.send_message(
                 SUPPORT_ID,
-                f"👨‍🚀 Usᴇʀ {user_mention} is an <b>{chat_member.status}</b> ɪɴ ᴄʜᴀᴛ <code>{chat.id}</code>.\n"
-                "Nᴏ ᴅᴇʟᴇᴛɪᴏɴ ᴡᴀs ᴘᴇʀғᴏʀᴍᴇᴅ.",
+                f"<blockquote>Usᴇʀ {user_mention} is an <b>{chat_member.status}</b> ɪɴ ᴄʜᴀᴛ <code>{chat.id}</code>.</blockquote>\n"
+                "<blockquote><b>Nᴏ ᴅᴇʟᴇᴛɪᴏɴ ᴡᴀs ᴘᴇʀғᴏʀᴍᴇᴅ.</b></blockquote>",
                 parse_mode='html'
             )
             return
@@ -90,8 +77,8 @@ async def check_edit(event):
     except Exception as e:
         await BOT.send_message(
             SUPPORT_ID,
-            f"🚫 Bᴏᴛ ɴᴇᴇᴅs ᴀᴅᴍɪɴ ʀɪɢʜᴛs ɪɴ ᴄʜᴀᴛ <code>{chat.id}</code>.\n"
-            f"Cᴀɴɴᴏᴛ ᴄʜᴇᴄᴋ/ᴅᴇʟ ᴇᴅɪᴛs ғʀᴏᴍ {user_mention}.",
+            f"<blockquote>Bᴏᴛ ɴᴇᴇᴅs ᴀᴅᴍɪɴ ʀɪɢʜᴛs ɪɴ ᴄʜᴀᴛ <code>{chat.id}</code>.</blockquote>\n"
+            f"<blockquote><b>Cᴀɴɴᴏᴛ ᴄʜᴇᴄᴋ/ᴅᴇʟ ᴇᴅɪᴛs ғʀᴏᴍ {user_mention}.<b></blockquote>",
             parse_mode='html'
         )
         return
@@ -102,24 +89,24 @@ async def check_edit(event):
 
         await BOT.send_message(
             chat.id,
-            f"{user_mention} Jᴜsᴛ ᴇᴅɪᴛᴇᴅ ᴀ ᴍᴇssᴀɢᴇ. "
-            "ɪ ʜᴀᴠᴇ ᴅᴇʟᴇᴛᴇᴅ ɪᴛ.",
+            f"<blockquote><b>{user_mention} Jᴜsᴛ ᴇᴅɪᴛᴇᴅ ᴀ ᴍᴇssᴀɢᴇ.<b></blockquote>"
+            "<blockquote><b>ɪ ʜᴀᴠᴇ ᴅᴇʟᴇᴛᴇᴅ ɪᴛ.<b></blockquote>",
             parse_mode='html'
         )
 
         await BOT.send_message(
             SUPPORT_ID,
-            f"🗑️ Dᴇʟᴇᴛᴇᴅ ᴇᴅɪᴛᴇᴅ ᴍᴇssᴀɢᴇ ғʀᴏᴍ ᴜɴᴀᴜᴛʜᴏʀɪᴢᴇᴅ ᴜsᴇʀ {user_mention} "
-            f"ɪɴ ᴄʜᴀᴛ <code>{chat.id}</code>.",
+            f"<blockquote><b>Dᴇʟᴇᴛᴇᴅ ᴇᴅɪᴛᴇᴅ ᴍᴇssᴀɢᴇ ғʀᴏᴍ ᴜɴᴀᴜᴛʜᴏʀɪᴢᴇᴅ ᴜsᴇʀ {user_mention}<b></blockquote>"
+            f"<blockquote><b>ɪɴ ᴄʜᴀᴛ <code>{chat.id}</code>.<b></blockquote>",
             parse_mode='html'
         )
 
     except Exception as e:
         await BOT.send_message(
             SUPPORT_ID,
-            f"❌ Fᴀɪʟᴇᴅ ᴛᴏ ᴅᴇʟᴇᴛᴇ ᴍᴇssᴀɢᴇ! Mᴀᴋᴇ sᴜʀᴇ ʙᴏᴛ ʜᴀs ᴅᴇʟᴇᴛᴇ ᴍᴇssᴀɢᴇ ᴀɴᴅ ɪɴᴠɪᴛᴇ ᴜsᴇʀs ʀɪɢʜᴛs.\n"
-            f"Message ID: <code>{event.id}</code> ɪɴ ᴄʜᴀᴛ <code>{chat.id}</code>.\n"
-            f"<code>{e}</code>",
+            f"<blockquote><b>Fᴀɪʟᴇᴅ ᴛᴏ ᴅᴇʟᴇᴛᴇ ᴍᴇssᴀɢᴇ! Mᴀᴋᴇ sᴜʀᴇ ʙᴏᴛ ʜᴀs ᴅᴇʟᴇᴛᴇ ᴍᴇssᴀɢᴇ ᴀɴᴅ ɪɴᴠɪᴛᴇ ᴜsᴇʀs ʀɪɢʜᴛs.<b></blockquote>\n"
+            f"<blockquote><b>Mᴇssᴀɢᴇ ID: <code>{event.id}</code> ɪɴ ᴄʜᴀᴛ <code>{chat.id}</code>.<b></blockquote>\n"
+            f"<blockquote><b><code>{e}</code><b></blockquote>",
             parse_mode='html'
         )
 
@@ -229,7 +216,7 @@ async def sudo_list(event):
     else:
         await event.reply(text, parse_mode='markdown')
 
-# Authorize a user
+# Authorize a user in a specific group
 @BOT.on(events.NewMessage(pattern='/auth'))
 async def auth(event):
     user = await event.get_sender()
@@ -255,22 +242,23 @@ async def auth(event):
             sudo_user_id = int(sudo_user)
             user_entity = await BOT.get_entity(PeerUser(sudo_user_id))
 
-        # Check if the user is already authorized
-        if authorized_users_collection.find_one({"user_id": sudo_user_id}):
-            await event.reply(f"{user_entity.first_name} ɪs ᴀʟʀᴇᴀᴅʏ ᴀᴜᴛʜᴏʀɪᴢᴇᴅ.")
+        # Check if the user is already authorized in this group
+        if authorized_users_collection.find_one({"user_id": sudo_user_id, "group_id": chat.id}):
+            await event.reply(f"{user_entity.first_name} ɪs ᴀʟʀᴇᴀᴅʏ ᴀᴜᴛʜᴏʀɪᴢᴇᴅ ɪɴ ᴛʜɪs ɢʀᴏᴜᴘ.")
             return
 
         # Add to the database
         authorized_users_collection.insert_one({
             "user_id": sudo_user_id,
             "username": user_entity.username,
-            "first_name": user_entity.first_name
+            "first_name": user_entity.first_name,
+            "group_id": chat.id
         })
-        await event.reply(f"{user_entity.first_name} ʜᴀs ʙᴇᴇɴ ᴀᴜᴛʜᴏʀɪᴢᴇᴅ.")
+        await event.reply(f"{user_entity.first_name} ʜᴀs ʙᴇᴇɴ ᴀᴜᴛʜᴏʀɪᴢᴇᴅ ɪɴ ᴛʜɪs ɢʀᴏᴜᴘ.")
     except Exception as e:
         await event.reply(f"Fᴀɪʟᴇᴅ ᴛᴏ ᴀᴜᴛʜᴏʀɪᴢᴇ ᴜsᴇʀ: {e}")
 
-# Unauthorize a user
+# Unauthorize a user in a specific group
 @BOT.on(events.NewMessage(pattern='/unauth'))
 async def unauth(event):
     user = await event.get_sender()
@@ -296,14 +284,14 @@ async def unauth(event):
             sudo_user_id = int(sudo_user)
             user_entity = await BOT.get_entity(PeerUser(sudo_user_id))
 
-        # Check if the user is authorized
-        if not authorized_users_collection.find_one({"user_id": sudo_user_id}):
-            await event.reply(f"{user_entity.first_name} ɪs ɴᴏᴛ ᴀᴜᴛʜᴏʀɪᴢᴇᴅ.")
+        # Check if the user is authorized in this group
+        if not authorized_users_collection.find_one({"user_id": sudo_user_id, "group_id": chat.id}):
+            await event.reply(f"{user_entity.first_name} ɪs ɴᴏᴛ ᴀᴜᴛʜᴏʀɪᴢᴇᴅ ɪɴ ᴛʜɪs ɢʀᴏᴜᴘ.")
             return
 
         # Remove from the database
-        authorized_users_collection.delete_one({"user_id": sudo_user_id})
-        await event.reply(f"{user_entity.first_name} ʜᴀs ʙᴇᴇɴ ᴜɴᴀᴜᴛʜᴏʀɪᴢᴇᴅ.")
+        authorized_users_collection.delete_one({"user_id": sudo_user_id, "group_id": chat.id})
+        await event.reply(f"{user_entity.first_name} ʜᴀs ʙᴇᴇɴ ᴜɴᴀᴜᴛʜᴏʀɪᴢᴇᴅ ɪɴ ᴛʜɪs ɢʀᴏᴜᴘ.")
     except Exception as e:
         await event.reply(f"Fᴀɪʟᴇᴅ ᴛᴏ ᴜɴᴀᴜᴛʜᴏʀɪᴢᴇ ᴜsᴇʀ: {e}")
 
