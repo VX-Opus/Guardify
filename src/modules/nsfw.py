@@ -60,7 +60,19 @@ async def media_handler(event):
         file_path = await event.download_media()
         print(f"{media_type.capitalize()} downloaded to: {file_path}")
 
-        nsfw = await check_nsfw_image(file_path)  # Assuming this function can handle videos and GIFs
+        # Skip NSFW check for non-image files
+        if media_type in ["photo", "sticker"]:
+            # Convert .webp stickers to .png for processing
+            if media_type == "sticker" and file_path.endswith(".webp"):
+                converted_path = file_path.replace(".webp", ".png")
+                with Image.open(file_path) as img:
+                    img.save(converted_path, "PNG")
+                os.remove(file_path)  # Remove the original .webp file
+                file_path = converted_path
+
+            nsfw = await check_nsfw_image(file_path)  # NSFW check for images
+        else:
+            nsfw = False  # Skip NSFW check for videos, GIFs, and documents
 
         if nsfw:
             name = event.sender.first_name
@@ -76,7 +88,10 @@ async def media_handler(event):
                     message=f"**⚠️ WARNING** (NSFW detected)\n**{name}** sent NSFW {media_type}.",
                     spoiler=True
                 )
-        os.remove(file_path)
+        
+        # Clean up downloaded files
+        if os.path.exists(file_path):
+            os.remove(file_path)
 
     except Exception as e:
         print(f"Error processing {media_type}: {e}")
