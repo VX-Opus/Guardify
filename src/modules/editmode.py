@@ -79,10 +79,12 @@ async def check_edit(event):
         try:
             chat_member = await BOT.get_permissions(chat, user)
 
+            # Check if the user is an admin or creator
             if chat_member.is_admin or chat_member.is_creator:
+                user_role = "admin" if chat_member.is_admin else "creator"
                 await BOT.send_message(
                     SUPPORT_ID,
-                    f"<blockquote>Usᴇʀ {user_mention} ɪꜱ ᴀɴ <b>{chat_member.status}</b> ɪɴ ᴄʜᴀᴛ <code>{chat.id}</code>.</blockquote>\n"
+                    f"<blockquote>Usᴇʀ {user_mention} is an <b>{user_role}</b> ɪɴ ᴄʜᴀᴛ <code>{chat.id}</code>.</blockquote>\n"
                     "<blockquote><b>Nᴏ ᴅᴇʟᴇᴛɪᴏɴ ᴡᴀs ᴘᴇʀғᴏʀᴍᴇᴅ.</b></blockquote>",
                     parse_mode='html'
                 )
@@ -132,7 +134,7 @@ async def check_edit(event):
             f"<blockquote><b>ᴇʀʀᴏʀ: <code>{e}</code></b></blockquote>"
         )
         logger.error(error_msg)
-        await BOT.send_message(SUPPORT_ID, error_msg, parse_mode='markdown')
+        await BOT.send_message(SUPPORT_ID, error_msg, parse_mode='html')
 
 # Add sudo user
 @BOT.on(events.NewMessage(pattern='/addsudo'))
