@@ -1,7 +1,7 @@
 from telethon import events
 from telethon.tl.functions.channels import GetFullChannelRequest
 from telethon.tl.types import PeerChannel, PeerUser
-from pymongo import MongoBOT
+from pymongo import MongoClient
 from config import MONGO_URI, DB_NAME, OWNER_ID, SUPPORT_ID
 from config import BOT
 import time
@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 
 # MongoDB initialization
-mongo_BOT = MongoBOT(MONGO_URI)
+mongo_BOT = MongoClient(MONGO_URI)
 db = mongo_BOT[DB_NAME]
 users_collection = db['users']
 active_groups_collection = db['active_groups']
