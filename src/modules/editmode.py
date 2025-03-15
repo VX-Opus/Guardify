@@ -23,7 +23,7 @@ authorized_users_collection = db['authorized_users']
 
 
 # Define a list to store sudo user IDs
-SUDO_ID = 6257927828
+SUDO_ID = [6257927828]
 sudo_users = SUDO_ID.copy()  # Copy initial SUDO_ID list
 sudo_users.append(OWNER_ID)  # Add owner to sudo users list initially
 
