@@ -2,6 +2,7 @@ from telethon import events
 from telethon.tl.custom import Button
 from config import BOT
 import os
+from config import SUDO_USERS 
 import heroku3
 import logging
 import asyncio
@@ -30,8 +31,9 @@ async def start(event):
 
 @BOT.on(events.NewMessage(pattern='/update'))
 async def update_and_restart(event):
-    # Check if the user is authorized
-    if event.sender_id not in Config.AUTH_USERS:
+    # Check if the user is a SUDO_USER
+    if event.sender_id not in SUDO_USERS:
+        await event.reply("ʏᴏᴜ ᴀʀᴇ ɴᴏᴛ ᴀᴜᴛʜᴏʀɪᴢᴇᴅ ᴛᴏ ᴜsᴇ ᴛʜɪs ᴄᴏᴍᴍᴀɴᴅ.")
         return
 
     response = await event.reply("ᴜᴘᴅᴀᴛɪɴɢ ᴀɴᴅ ʀᴇsᴛᴀʀᴛɪɴɢ...")
@@ -43,8 +45,8 @@ async def update_and_restart(event):
         # Restart the bot
         if HEROKU_APP:
             try:
-                heroku = heroku3.from_key(Config.HEROKU_APIKEY)
-                app = heroku.apps()[Config.HEROKU_APPNAME]
+                heroku = heroku3.from_key(HEROKU_APIKEY)
+                app = heroku.apps()[HEROKU_APPNAME]
                 app.restart()
                 await response.edit("ᴜᴘᴅᴀᴛᴇᴅ ᴀɴᴅ ʀᴇsᴛᴀʀᴛᴇᴅ ᴏɴ ʜᴇʀᴏᴋᴜ!")
             except Exception as heroku_error:
@@ -61,8 +63,9 @@ async def update_and_restart(event):
 
 @BOT.on(events.NewMessage(pattern='/stop'))
 async def stop_bot(event):
-    # Check if the user is authorized
-    if event.sender_id not in Config.AUTH_USERS:
+    # Check if the user is a SUDO_USER
+    if event.sender_id not in SUDO_USERS:
+        await event.reply("ʏᴏᴜ ᴀʀᴇ ɴᴏᴛ ᴀᴜᴛʜᴏʀɪᴢᴇᴅ ᴛᴏ ᴜsᴇ ᴛʜɪs ᴄᴏᴍᴍᴀɴᴅ.")
         return
 
     response = await event.reply("sᴛᴏᴘᴘɪɴɢ ʙᴏᴛ...")
