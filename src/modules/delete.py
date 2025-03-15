@@ -2,12 +2,14 @@ from telethon import TelegramClient, events
 from telethon.tl.types import MessageMediaPhoto, MessageMediaDocument
 import asyncio
 from config import BOT
+from src.status import *
 
 
 delay_times = {}
 
 
 @BOT.on(events.NewMessage(pattern='/setdelay'))
+@is_admin
 async def set_delay(event):
     try:
 
@@ -24,6 +26,7 @@ async def set_delay(event):
         await event.reply("ᴜꜱᴀɢᴇ: /setdelay <ᴛɪᴍᴇ_ɪɴ_ᴍɪɴᴜᴛᴇꜱ>")
         
 @BOT.on(events.NewMessage(func=lambda e: e.is_group and e.media))
+@is_admin
 async def handle_media(event):
     chat_id = event.chat_id
     if chat_id in delay_times:
