@@ -34,34 +34,52 @@ async def check_nsfw_image(image_path):
         return False
 
 @BOT.on(events.NewMessage(func=lambda e: e.is_group and (e.photo or e.video or e.sticker or e.gif or e.document)))
-async def image(event):
+async def media_handler(event):
     try:
-        photo = event.photo
-        print(f"ᴅᴏᴡɴʟᴏᴀᴅɪɴɢ ɪᴍᴀɢᴇ ᴡɪᴛʜ ꜰɪʟᴇ ɪᴅ: {photo.id}")
+        # Determine the type of media
+        if event.photo:
+            media_type = "photo"
+            media = event.photo
+        elif event.video:
+            media_type = "video"
+            media = event.video
+        elif event.sticker:
+            media_type = "sticker"
+            media = event.sticker
+        elif event.gif:
+            media_type = "gif"
+            media = event.gif
+        elif event.document:
+            media_type = "document"
+            media = event.document
+        else:
+            return
+
+        print(f"Downloading {media_type} with file id: {media.id}")
 
         file_path = await event.download_media()
-        print(f"ɪᴍᴀɢᴇ ᴅᴏᴡɴʟᴏᴀᴅᴇᴅ ᴛᴏ: {file_path}")
+        print(f"{media_type.capitalize()} downloaded to: {file_path}")
 
-        nsfw = await check_nsfw_image(file_path)
+        nsfw = await check_nsfw_image(file_path)  # Assuming this function can handle videos and GIFs
 
         if nsfw:
             name = event.sender.first_name
             await event.delete()
             
             await event.respond(
-                f"**⚠️ ᴡᴀʀɴɪɴɢ** (ɴꜱꜰᴡ ᴅᴇᴛᴇᴄᴛᴇᴅ)\n**{name}** ꜱᴇɴᴛ ɴꜱꜰᴡ ɪᴍᴀɢᴇ."
+                f"**⚠️ WARNING** (NSFW detected)\n**{name}** sent NSFW {media_type}."
             )
 
             if SPOILER:  
                 await event.respond(
                     file=file_path,
-                    message=f"**⚠️ ᴡᴀʀɴɪɴɢ** (ɴꜱꜰᴡ ᴅᴇᴛᴇᴄᴛᴇᴅ)\n**{name}** ꜱᴇɴᴛ ɴꜱꜰᴡ ɪᴍᴀɢᴇ.",
+                    message=f"**⚠️ WARNING** (NSFW detected)\n**{name}** sent NSFW {media_type}.",
                     spoiler=True
                 )
         os.remove(file_path)
 
     except Exception as e:
-        print(f"ᴇʀʀᴏʀ ᴘʀᴏᴄᴇssɪɴɢ ɪᴍᴀɢᴇ: {e}") 
+        print(f"Error processing {media_type}: {e}")
 
 @BOT.on(events.NewMessage(func=lambda e: e.is_group and e.text))
 async def slang(event):
