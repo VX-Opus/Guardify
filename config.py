@@ -21,10 +21,10 @@ SUDO_USERS.extend(DEV)  # Add DEV users if any
 
 SPOILER_MODE = os.environ.get("SPOILER_MODE", "True").lower() == "true"
 MONGO_URI = "mongodb+srv://kunaalkumar0091:6qhyyQIyS2idoGFQ@cluster0.z2jge.mongodb.net/?retryWrites=true&w=majority"
-DB_NAME = ""
+DB_NAME = "kunaalkumar0091"
 LOGGER = False
 BOT_NAME = "Guardify"
-SUPPORT_ID = -1002064111110
+SUPPORT_ID = -1002440907656
 BOT_TOKEN = getenv("BOT_TOKEN", default=None)
 
 # Initialize the bot client
